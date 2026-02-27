@@ -2,12 +2,12 @@ package com.example.shipeatscustomer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,26 +47,49 @@ public class A4_CustomerOrderActivity extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
         });
+
+        setupBottomNav();
     }
 
     private void loadOrders(String status) {
-        FirebaseDatabase.getInstance().getReference("Orders")
-                .orderByChild("status").equalTo(status)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        orderList.clear();
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            AdminOrderModel order = ds.getValue(AdminOrderModel.class);
-                            if (order != null) {
-                                order.orderId = ds.getKey(); // Ensure we have the ID
-                                orderList.add(order);
-                            }
-                        }
-                        adapter.notifyDataSetChanged();
+        ValueEventListener listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                orderList.clear();
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    AdminOrderModel order = ds.getValue(AdminOrderModel.class);
+                    if (order != null) {
+                        order.orderId = ds.getKey();
+                        orderList.add(order);
                     }
-                    @Override
-                    public void onCancelled(DatabaseError error) {}
-                });
+                }
+                adapter.notifyDataSetChanged();
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {}
+        };
+
+        if (status.equals("All")) {
+            FirebaseDatabase.getInstance().getReference("Orders").addValueEventListener(listener);
+        } else {
+            FirebaseDatabase.getInstance().getReference("Orders")
+                    .orderByChild("status").equalTo(status)
+                    .addValueEventListener(listener);
+        }
+    }
+
+    private void setupBottomNav() {
+        View footer = findViewById(R.id.footer_section);
+        footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A2_Dashboard.class)));
+
+        footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A3_Inventory_Management.class)));
+
+        footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A5_MenuManagementActivity.class)));
+
+        footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A6_Profile.class)));
     }
 }

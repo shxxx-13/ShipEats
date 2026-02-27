@@ -90,6 +90,15 @@ public class A3_Inventory_Management extends AppCompatActivity {
         footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
                 startActivity(new Intent(this, A2_Dashboard.class)));
 
+        footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
+                Toast.makeText(this, "You are already on Inventory", Toast.LENGTH_SHORT).show());
+
+        footer.findViewById(R.id.orders_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A4_CustomerOrderActivity.class)));
+
+        footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A5_MenuManagementActivity.class)));
+
         footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
                 startActivity(new Intent(this, A6_Profile.class)));
     }

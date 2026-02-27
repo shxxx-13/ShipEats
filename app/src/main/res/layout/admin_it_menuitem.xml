@@ -15,7 +15,7 @@
         android:background="@color/white"
         android:padding="12dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgFood"
             android:layout_width="80dp"
             android:layout_height="80dp"
@@ -23,7 +23,7 @@
             android:src="@color/light_gray"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/InputLayout" />
+            app:shapeAppearanceOverlay="@style/CircleImageAppearance" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipStatus"

@@ -43,8 +43,6 @@ public class A6_Profile extends AppCompatActivity {
 
         findViewById(R.id.card_logout).setOnClickListener(v -> showLogoutDialog());
 
-        setupBottomNav();
-
         layoutViewMode = findViewById(R.id.layout_view_mode);
         layoutEditMode = findViewById(R.id.layout_edit_mode);
         btnEditAvatar = findViewById(R.id.btn_edit_avatar);
@@ -60,14 +58,26 @@ public class A6_Profile extends AppCompatActivity {
             switchToViewMode();
             showSuccessDialog("Profile updated");
         });
+
+        setupBottomNav();
     }
 
     private void setupBottomNav() {
-        findViewById(R.id.dashboard_nav).setOnClickListener(v ->
+        View footer = findViewById(R.id.footer_section);
+        footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
                 startActivity(new Intent(this, A2_Dashboard.class)));
 
-        findViewById(R.id.inventory_nav).setOnClickListener(v ->
+        footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
                 startActivity(new Intent(this, A3_Inventory_Management.class)));
+
+        footer.findViewById(R.id.orders_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A4_CustomerOrderActivity.class)));
+
+        footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
+                startActivity(new Intent(this, A5_MenuManagementActivity.class)));
+
+        footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
+                Toast.makeText(this, "You are already on Profile", Toast.LENGTH_SHORT).show());
     }
 
     private void showChangeHoursDialog() {

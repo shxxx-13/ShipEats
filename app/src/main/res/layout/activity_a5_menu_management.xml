@@ -4,42 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/beige">
+    android:background="#FFFEF0">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topToolbar"
-        style="@style/AppToolbar"
+    <include
+        android:id="@+id/header_section"
+        layout="@layout/admin_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/notif_toolbar"
-        app:titleCentered="false">
-
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/shipeats_logo" />
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="32dp"
-            android:src="@drawable/shipeats_name" />
-    </com.google.android.material.appbar.MaterialToolbar>
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
         android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:layout_constraintBottom_toTopOf="@+id/footer_section"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topToolbar">
+        app:layout_constraintTop_toBottomOf="@+id/header_section">
 
         <TextView
             style="@style/font1"
@@ -56,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Manage your menu items and categories"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/dark_gray"
             android:textSize="14sp" />
 
         <LinearLayout
@@ -85,10 +69,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Preview Menu"
-                app:strokeColor="@color/primary_dark"
                 android:textColor="@color/primary_dark"
+                app:icon="@android:drawable/ic_menu_view"
                 app:iconTint="@color/primary_dark"
-                app:icon="@drawable/ic_eye" />
+                app:strokeColor="@color/primary_dark" />
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -147,17 +131,13 @@
 
     </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
+    <include
+        android:id="@+id/footer_section"
+        layout="@layout/admin_footer_nav_bar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:backgroundTint="@color/primary_dark"
-        app:itemIconTint="@color/bottom_nav_select"
-        app:itemTextColor="@color/bottom_nav_select"
-        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/admin_toolbar" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
