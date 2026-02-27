@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "658524987758",
+    "project_id": "shipeats-customer",
+    "storage_bucket": "shipeats-customer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658524987758:android:70920080b1522aa038e17f",
+        "android_client_info": {
+          "package_name": "com.example.shipeatscustomer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIJwd4bi-e1wJkNtumuR42J-MzdLiYrtw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

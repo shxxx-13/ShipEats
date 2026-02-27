@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/inventoryCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/light_gray"
+    app:strokeWidth="1dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <ImageView
+            style="@style/InputLayout"
+            android:id="@+id/imgInvFood"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@color/light_gray"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipInvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Available"
+            android:textSize="10sp"
+            app:chipBackgroundColor="@color/green"
+            app:chipMinHeight="20dp"
+            app:layout_constraintStart_toEndOf="@id/imgInvFood"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            style="@style/font3"
+            android:id="@+id/tvInvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nasi Goreng"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/chipInvStatus"
+            app:layout_constraintTop_toBottomOf="@id/chipInvStatus" />
+
+        <TextView
+            android:id="@+id/tvInvPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RM3.50"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/tvInvName"
+            app:layout_constraintTop_toBottomOf="@id/tvInvName" />
+
+        <TextView
+            android:id="@+id/tvInvQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quantity : 8"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/tvInvPrice"
+            app:layout_constraintTop_toBottomOf="@id/tvInvPrice" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

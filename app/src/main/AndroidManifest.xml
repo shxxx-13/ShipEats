@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ShipEatsCustomer">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".A5_EditMenuActivity" android:exported="false" />
+        <activity android:name=".OrderCompletedPPActivity" android:exported="false" />
+        <activity android:name=".OrderReadyPPActivity" android:exported="false" />
+        <activity android:name=".OrderDeletedPPActivity" android:exported="false" />
+        <activity android:name=".A4_OrderDetailPreparingActivity" android:exported="false" />
+        <activity android:name=".ItemMenuPreviewActivity" android:exported="false" />
+        <activity android:name=".MenuPreviewActivity" android:exported="false" />
+        <activity android:name=".MenuCompletePPActivity" android:exported="false" />
+        <activity android:name=".MenuDeletePPActivity" android:exported="false" />
+        <activity android:name=".MenuAddPPActivity" android:exported="false" />
+        <activity android:name=".MenuAddActivity" android:exported="false" />
+        <activity android:name=".DeleteMenuPPActivity" android:exported="false" />
+        <activity android:name=".AddMenuPPActivity" android:exported="false" />
+        <activity android:name=".MenuManagementAddItemActivity" android:exported="false" />
+        <activity android:name=".activity_add_item_mm" android:exported="false" />
+        <activity android:name=".A4_OrderDetailPendingActivity" android:exported="false" />
+        <activity android:name=".A5_MenuManagementActivity" android:exported="false" />
+        <activity android:name=".MenuManagementActivity2" android:exported="false" />
+        <activity android:name=".C8_Order_Placed" android:exported="false" />
+        <activity android:name=".C7_Shopping_Cart" android:exported="false" />
+        <activity android:name=".C6_History_Details_Page" android:exported="false" />
+        <activity android:name=".C5_History_Page" android:exported="false" />
+        <activity android:name=".C4_Food_Details" android:exported="false" />
+        <activity android:name=".C3_Menu_Page" android:exported="false" />
+        <activity android:name=".A1_Login_Page" android:exported="false" />
+        <activity android:name=".C2_Create_Account" android:exported="false" />
+
+    </application>
+</manifest>
