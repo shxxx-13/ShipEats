@@ -23,4 +23,9 @@
         <item>Side</item>
         <item>Drink</item>
     </string-array>
+
+    <!-- Missing strings for Notifications -->
+    <string name="notificationcustomizationnote">Control how you want to receive updates from ShipEats.</string>
+    <string name="notificationheadertitle">System Notifications</string>
+    <string name="notifications">Notifications</string>
 </resources>

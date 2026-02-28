@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot snapshot) {
                             if (snapshot.exists()) {
                                 Toast.makeText(MainActivity.this, "Guest Login Successful", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(MainActivity.this, A4_CustomerOrderActivity.class));
+                                // FIX: Redirect to C3_Menu_Page instead of A4_CustomerOrderActivity
+                                startActivity(new Intent(MainActivity.this, C3_Menu_Page.class));
                                 finish();
                             } else {
                                 Toast.makeText(MainActivity.this, "Not a registered guest account.", Toast.LENGTH_SHORT).show();
