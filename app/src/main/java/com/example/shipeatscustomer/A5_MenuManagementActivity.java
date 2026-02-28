@@ -57,8 +57,8 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
         findViewById(R.id.add_menu_item_button).setOnClickListener(v -> showInventoryDialog());
 
         // Preview Menu Button -> Navigates to MenuPreviewActivity
-        findViewById(R.id.btn_preview_menu).setOnClickListener(v -> 
-                startActivity(new Intent(this, MenuPreviewActivity.class)));
+        findViewById(R.id.btn_preview_menu).setOnClickListener(v ->
+        startActivity(new Intent(this, MenuPreviewActivity.class)));
 
         setupBottomNav();
     }
