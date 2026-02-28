@@ -1,13 +1,16 @@
 package com.example.shipeatscustomer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -15,10 +18,12 @@ import java.util.List;
 public class A5_MenuAdapter extends RecyclerView.Adapter<A5_MenuAdapter.MenuViewHolder> {
     private Context context;
     private List<FoodItem> menuList;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
-    public A5_MenuAdapter(Context context, List<FoodItem> menuList) {
+    public A5_MenuAdapter(Context context, List<FoodItem> menuList, ActivityResultLauncher<Intent> launcher) {
         this.context = context;
         this.menuList = menuList;
+        this.imagePickerLauncher = launcher;
     }
 
     @NonNull
@@ -35,8 +40,11 @@ public class A5_MenuAdapter extends RecyclerView.Adapter<A5_MenuAdapter.MenuView
         holder.tvPrice.setText("RM " + String.format("%.2f", item.getPrice()));
 
         // Handle Edit Flow
-        holder.itemView.setOnClickListener(v ->
-                AdminDialogHelper.showEditMenuDialog(context, item, false));
+        holder.itemView.setOnClickListener(v -> {
+            if (context instanceof AppCompatActivity) {
+                AdminDialogHelper.showEditMenuDialog((AppCompatActivity) context, imagePickerLauncher, item, false);
+            }
+        });
 
         // Handle Delete Flow
         holder.btnRemove.setOnClickListener(v ->

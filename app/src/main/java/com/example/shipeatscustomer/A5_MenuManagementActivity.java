@@ -1,11 +1,15 @@
 package com.example.shipeatscustomer;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,6 +30,17 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
     private List<FoodItem> menuList = new ArrayList<>();
     private DatabaseReference menuRef = FirebaseDatabase.getInstance().getReference("food_items");
 
+    // Launcher for image selection
+    private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri selectedImageUri = result.getData().getData();
+                    AdminDialogHelper.handleImageResult(selectedImageUri);
+                }
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +48,8 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
 
         rvMenuItems = findViewById(R.id.rvMenuItems);
         rvMenuItems.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new A5_MenuAdapter(this, menuList);
+        // FIX: Added imagePickerLauncher as the third argument
+        adapter = new A5_MenuAdapter(this, menuList, imagePickerLauncher);
         rvMenuItems.setAdapter(adapter);
 
         // Listen for Menu changes
@@ -44,21 +60,29 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     FoodItem item = ds.getValue(FoodItem.class);
                     if (item != null) {
+                        item.setId(ds.getKey()); // Ensure ID is set from the Firebase key
                         menuList.add(item);
                     }
                 }
                 adapter.notifyDataSetChanged();
             }
             @Override
-            public void onCancelled(DatabaseError error) {}
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(A5_MenuManagementActivity.this, "Firebase Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Add Item Button -> Opens Inventory Dialog
         findViewById(R.id.add_menu_item_button).setOnClickListener(v -> showInventoryDialog());
 
         // Preview Menu Button -> Navigates to MenuPreviewActivity
-        findViewById(R.id.btn_preview_menu).setOnClickListener(v ->
-        startActivity(new Intent(this, MenuPreviewActivity.class)));
+        findViewById(R.id.btn_preview_menu).setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(this, MenuPreviewActivity.class));
+            } catch (Exception e) {
+                Toast.makeText(this, "MenuPreviewActivity not found", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         setupBottomNav();
     }
@@ -81,7 +105,7 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
             @Override
             public void onEdit(FoodItem item) {
                 dialog.dismiss();
-                AdminDialogHelper.showEditMenuDialog(A5_MenuManagementActivity.this, item, true);
+                AdminDialogHelper.showEditMenuDialog(A5_MenuManagementActivity.this, imagePickerLauncher, item, false);
             }
         });
         rvInv.setAdapter(invAdapter);
@@ -94,6 +118,7 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     FoodItem item = ds.getValue(FoodItem.class);
                     if (item != null) {
+                        item.setId(ds.getKey());
                         inventoryList.add(item);
                     }
                 }
@@ -110,19 +135,21 @@ public class A5_MenuManagementActivity extends AppCompatActivity {
 
     private void setupBottomNav() {
         View footer = findViewById(R.id.footer_section);
-        footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A2_Dashboard.class)));
+        if (footer != null) {
+            footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A2_Dashboard.class)));
 
-        footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A3_Inventory_Management.class)));
+            footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A3_Inventory_Management.class)));
 
-        footer.findViewById(R.id.orders_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A4_CustomerOrderActivity.class)));
+            footer.findViewById(R.id.orders_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A4_CustomerOrderActivity.class)));
 
-        footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
-                Toast.makeText(this, "You are already on Menu Management", Toast.LENGTH_SHORT).show());
+            footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
+                    Toast.makeText(this, "You are already on Menu Management", Toast.LENGTH_SHORT).show());
 
-        footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A6_Profile.class)));
+            footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A6_Profile.class)));
+        }
     }
 }

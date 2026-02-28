@@ -1,11 +1,15 @@
 package com.example.shipeatscustomer;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +34,17 @@ public class A3_Inventory_Management extends AppCompatActivity {
     List<FoodItem> foodList;
     A3_InventoryAdapter adapter;
 
+    // Launcher for image selection from gallery
+    private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri selectedImageUri = result.getData().getData();
+                    AdminDialogHelper.handleImageResult(selectedImageUri);
+                }
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +68,7 @@ public class A3_Inventory_Management extends AppCompatActivity {
 
             @Override
             public void onEdit(FoodItem item) {
-                AdminDialogHelper.showEditMenuDialog(A3_Inventory_Management.this, item, false);
+                AdminDialogHelper.showEditMenuDialog(A3_Inventory_Management.this, imagePickerLauncher, item, false);
             }
         });
 
@@ -80,26 +95,28 @@ public class A3_Inventory_Management extends AppCompatActivity {
             }
         });
 
-        addItemBtn.setOnClickListener(v -> AdminDialogHelper.showEditMenuDialog(this, null, true));
+        addItemBtn.setOnClickListener(v -> AdminDialogHelper.showEditMenuDialog(this, imagePickerLauncher, null, true));
 
         setupBottomNav();
     }
 
     private void setupBottomNav() {
         View footer = findViewById(R.id.footer_section);
-        footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A2_Dashboard.class)));
+        if (footer != null) {
+            footer.findViewById(R.id.dashboard_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A2_Dashboard.class)));
 
-        footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
-                Toast.makeText(this, "You are already on Inventory", Toast.LENGTH_SHORT).show());
+            footer.findViewById(R.id.inventory_nav).setOnClickListener(v ->
+                    Toast.makeText(this, "You are already on Inventory", Toast.LENGTH_SHORT).show());
 
-        footer.findViewById(R.id.orders_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A4_CustomerOrderActivity.class)));
+            footer.findViewById(R.id.orders_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A4_CustomerOrderActivity.class)));
 
-        footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A5_MenuManagementActivity.class)));
+            footer.findViewById(R.id.menu_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A5_MenuManagementActivity.class)));
 
-        footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
-                startActivity(new Intent(this, A6_Profile.class)));
+            footer.findViewById(R.id.profile_nav).setOnClickListener(v ->
+                    startActivity(new Intent(this, A6_Profile.class)));
+        }
     }
 }
