@@ -38,6 +38,7 @@
             android:layout_marginStart="12dp"/>
 
         <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/swPublish"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"

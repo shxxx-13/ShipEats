@@ -6,38 +6,24 @@
     android:layout_height="match_parent"
     android:background="@color/beige">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topToolbar"
-        style="@style/AppToolbar"
+    <include
+        android:id="@+id/header_section"
+        layout="@layout/admin_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/notif_toolbar"
-        app:titleCentered="false">
-
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/shipeats_logo" />
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="32dp"
-            android:src="@drawable/shipeats_name" />
-    </com.google.android.material.appbar.MaterialToolbar>
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintBottom_toTopOf="@id/footer_section"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topToolbar">
+        app:layout_constraintTop_toBottomOf="@id/header_section">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -125,17 +111,13 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
+    <include
+        android:id="@+id/footer_section"
+        layout="@layout/admin_footer_nav_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:backgroundTint="@color/primary_dark"
-        app:itemIconTint="@color/bottom_nav_select"
-        app:itemTextColor="@color/bottom_nav_select"
-        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/admin_toolbar" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

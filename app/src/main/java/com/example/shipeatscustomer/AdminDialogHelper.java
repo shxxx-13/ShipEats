@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -36,12 +37,14 @@ public class AdminDialogHelper {
         EditText etPrice = dialog.findViewById(R.id.et_price);
         Spinner spinnerQty = dialog.findViewById(R.id.spinner_quantity);
         Spinner spinnerCat = dialog.findViewById(R.id.spinner_category);
+        CheckBox cbVeg = dialog.findViewById(R.id.cb_vegetarian);
+        CheckBox cbSpicy = dialog.findViewById(R.id.cb_spicy);
         Button btnDone = dialog.findViewById(R.id.btn_add_confirm);
         ImageView btnCancel = dialog.findViewById(R.id.btn_close);
         View cardImageUpload = dialog.findViewById(R.id.card_image_upload);
         dialogImageView = dialog.findViewById(R.id.img_food);
 
-        selectedImageUri = null; // Reset for new session
+        selectedImageUri = null;
 
         // Populate Spinners
         ArrayAdapter<CharSequence> qtyAdapter = ArrayAdapter.createFromResource(activity,
@@ -58,7 +61,9 @@ public class AdminDialogHelper {
             etName.setText(item.getName());
             etDesc.setText(item.getDescription());
             etPrice.setText(String.valueOf(item.getPrice()));
-            // Set spinner selections
+            cbVeg.setChecked(item.isVegetarian());
+            cbSpicy.setChecked(item.isSpicy());
+            
             int qtyPosition = qtyAdapter.getPosition(String.valueOf(item.getQuantity()));
             spinnerQty.setSelection(qtyPosition);
             int catPosition = catAdapter.getPosition(item.getCategory());
@@ -82,11 +87,15 @@ public class AdminDialogHelper {
                 double price = Double.parseDouble(etPrice.getText().toString());
                 int quantity = Integer.parseInt(spinnerQty.getSelectedItem().toString());
                 String category = spinnerCat.getSelectedItem().toString();
+                boolean isVeg = cbVeg.isChecked();
+                boolean isSpicy = cbSpicy.isChecked();
                 
                 String imageUrl = (selectedImageUri != null) ? selectedImageUri.toString() : 
                                  (item != null && item.getImageUrl() != null ? item.getImageUrl() : "");
 
                 FoodItem updatedItem = new FoodItem(id, name, desc, category, price, quantity, imageUrl);
+                updatedItem.setVegetarian(isVeg);
+                updatedItem.setSpicy(isSpicy);
 
                 databaseRef.child(id).setValue(updatedItem).addOnSuccessListener(aVoid -> {
                     dialog.dismiss();

@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class A3_InventoryAdapter extends RecyclerView.Adapter<A3_InventoryAdapter.ViewHolder> {
@@ -21,16 +23,28 @@ public class A3_InventoryAdapter extends RecyclerView.Adapter<A3_InventoryAdapte
     Context context;
     List<FoodItem> foodList;
     OnItemActionListener listener;
+    private boolean isSelectionMode = false;
+    private List<String> selectedItemIds = new ArrayList<>();
 
     public interface OnItemActionListener {
         void onDelete(FoodItem item);
         void onEdit(FoodItem item);
+        default void onItemSelected(FoodItem item) {}
     }
 
     public A3_InventoryAdapter(Context context, List<FoodItem> foodList, OnItemActionListener listener) {
         this.context = context;
         this.foodList = foodList;
         this.listener = listener;
+    }
+
+    public void setSelectionMode(boolean selectionMode) {
+        this.isSelectionMode = selectionMode;
+        notifyDataSetChanged();
+    }
+
+    public List<String> getSelectedItemIds() {
+        return selectedItemIds;
     }
 
     @NonNull
@@ -43,7 +57,6 @@ public class A3_InventoryAdapter extends RecyclerView.Adapter<A3_InventoryAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
         FoodItem item = foodList.get(position);
 
         holder.tvName.setText(item.getName());
@@ -53,32 +66,54 @@ public class A3_InventoryAdapter extends RecyclerView.Adapter<A3_InventoryAdapte
         String status = item.getStatus() != null ? item.getStatus() : "Available";
         holder.tvStatus.setText(status);
 
-        // ✅ Status color
+        // Status color
         switch (status) {
             case "Available":
-                holder.tvStatus.setTextColor(Color.parseColor("#16A34A")); // Green
+                holder.tvStatus.setTextColor(Color.parseColor("#16A34A"));
                 break;
             case "Low Stock":
-                holder.tvStatus.setTextColor(Color.parseColor("#F59E0B")); // Orange
+                holder.tvStatus.setTextColor(Color.parseColor("#F59E0B"));
                 break;
             case "Sold Out":
-                holder.tvStatus.setTextColor(Color.parseColor("#DC2626")); // Red
+                holder.tvStatus.setTextColor(Color.parseColor("#DC2626"));
                 break;
         }
 
-        // ✅ Load Image
-        String imageUrl = item.getImageUrl();
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            Glide.with(context)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.no_image_available)
-                    .into(holder.ivFood);
-        } else {
-            holder.ivFood.setImageResource(R.drawable.no_image_available);
-        }
+        // Load Image
+        Glide.with(context)
+                .load(item.getImageUrl())
+                .placeholder(R.drawable.no_image_available)
+                .into(holder.ivFood);
 
-        holder.btnEdit.setOnClickListener(v -> listener.onEdit(item));
-        holder.btnDelete.setOnClickListener(v -> listener.onDelete(item));
+        if (isSelectionMode) {
+            holder.btnEdit.setVisibility(View.GONE);
+            holder.btnDelete.setVisibility(View.GONE);
+            
+            // Highlight if selected
+            if (selectedItemIds.contains(item.getId())) {
+                holder.cardView.setStrokeColor(Color.parseColor("#FFD700")); // Gold
+                holder.cardView.setStrokeWidth(6);
+            } else {
+                holder.cardView.setStrokeColor(Color.parseColor("#D0D5DD"));
+                holder.cardView.setStrokeWidth(2);
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (selectedItemIds.contains(item.getId())) {
+                    selectedItemIds.remove(item.getId());
+                } else {
+                    selectedItemIds.add(item.getId());
+                }
+                notifyItemChanged(position);
+                listener.onItemSelected(item);
+            });
+        } else {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnDelete.setVisibility(View.VISIBLE);
+            holder.cardView.setStrokeWidth(0);
+            holder.btnEdit.setOnClickListener(v -> listener.onEdit(item));
+            holder.btnDelete.setOnClickListener(v -> listener.onDelete(item));
+        }
     }
 
     @Override
@@ -87,20 +122,19 @@ public class A3_InventoryAdapter extends RecyclerView.Adapter<A3_InventoryAdapte
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-
         TextView tvName, tvPrice, tvQuantity, tvStatus;
         ImageView ivFood;
         MaterialButton btnEdit, btnDelete;
+        MaterialCardView cardView;
 
         ViewHolder(View itemView) {
             super(itemView);
-
+            cardView = (MaterialCardView) itemView;
             tvName = itemView.findViewById(R.id.tv_food_name);
             tvPrice = itemView.findViewById(R.id.tv_price);
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
             tvStatus = itemView.findViewById(R.id.tv_status);
             ivFood = itemView.findViewById(R.id.iv_food);
-
             btnEdit = itemView.findViewById(R.id.btn_edit);
             btnDelete = itemView.findViewById(R.id.btn_delete);
         }

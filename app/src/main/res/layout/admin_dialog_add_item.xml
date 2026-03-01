@@ -80,7 +80,7 @@
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:src="@drawable/ic_cloud_upload"
-                            android:tint="@color/white"/>
+                            app:tint="@color/white"/>
 
                         <TextView
                             android:text="Tap to Upload"
@@ -180,6 +180,33 @@
                 android:layout_height="48dp"
                 android:background="@drawable/bg_input_field"
                 android:layout_marginTop="8dp"/>
+
+            <!-- Dietary Flags -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:weightSum="2">
+
+                <CheckBox
+                    android:id="@+id/cb_vegetarian"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vegetarian"
+                    android:textColor="#04397B"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/cb_spicy"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Spicy"
+                    android:textColor="#04397B"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_add_confirm"

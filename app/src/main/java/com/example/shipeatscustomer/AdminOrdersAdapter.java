@@ -1,20 +1,14 @@
 package com.example.shipeatscustomer;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -31,7 +25,7 @@ public class AdminOrdersAdapter extends RecyclerView.Adapter<AdminOrdersAdapter.
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.admin_it_order_card, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.admin_it_order_card, parent, false);
         return new OrderViewHolder(v);
     }
 
@@ -39,78 +33,61 @@ public class AdminOrdersAdapter extends RecyclerView.Adapter<AdminOrdersAdapter.
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         AdminOrderModel order = orderList.get(position);
 
-        holder.tvOrderId.setText("Order No. " + order.orderId);
-        holder.tvTotal.setText("RM " + order.totalPrice);
+        if (order == null) return;
+
+        // Null-safe Order ID display
+        String orderId = order.orderId != null ? order.orderId : "unknown";
+        String displayId = orderId.length() > 8 ? orderId.substring(orderId.length() - 8).toUpperCase() : orderId;
+        holder.tvOrderNo.setText("#" + displayId);
+
+        // Null-safe status display
+        String status = order.status != null ? order.status : "Pending";
+        holder.tvStatusBadge.setText(status.toLowerCase());
+
+        holder.tvCustomerName.setText("⚪ " + (order.customerName != null ? order.customerName : "Guest"));
+        
+        String itemsText = order.items != null ? order.items.replace("\n", ", ") : "No items";
+        holder.tvItems.setText("Items: " + itemsText);
+        
+        holder.tvItemCount.setText(order.itemCount + (order.itemCount > 1 ? " items" : " item"));
+        holder.tvTotal.setText("Total " + (order.totalPrice != null ? order.totalPrice : "RM 0.00"));
+
+        // Update badge color based on status
+        if ("Pending".equalsIgnoreCase(status)) {
+            holder.tvStatusBadge.setBackgroundResource(R.drawable.stat_pending_bg);
+        } else if ("Preparing".equalsIgnoreCase(status)) {
+            holder.tvStatusBadge.setBackgroundResource(R.drawable.stat_preparing_bg);
+        } else {
+            holder.tvStatusBadge.setBackgroundResource(R.drawable.stat_accepted_bg);
+        }
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent;
-            // Logic to route to the correct detail view based on current status
-            if ("Pending".equals(order.status)) {
+            Intent intent = null;
+            if ("Pending".equalsIgnoreCase(status)) {
                 intent = new Intent(context, A4_OrderDetailPendingActivity.class);
-            } else if ("Preparing".equals(order.status)) {
+            } else if ("Preparing".equalsIgnoreCase(status)) {
                 intent = new Intent(context, A4_OrderDetailPreparingActivity.class);
-            } else {
-                return; // No detail view for completed/cancelled in this flow
             }
 
-            // Pass the ID to the activity
-            intent.putExtra("orderId", order.orderId);
-            context.startActivity(intent);
+            if (intent != null) {
+                intent.putExtra("orderId", orderId);
+                context.startActivity(intent);
+            }
         });
-    }
-
-    private void openOrderDetail(AdminOrderModel order) {
-        Dialog dialog = new Dialog(context);
-
-        // Dynamic layout selection based on current status
-        int layoutRes;
-        switch (order.status) {
-            case "Preparing": layoutRes = R.layout.activity_a4_order_det_preparing; break;
-            case "Completed": layoutRes = R.layout.activity_a4_order_det_history; break;
-            default: layoutRes = R.layout.activity_a4_order_det_pending; break;
-        }
-
-        dialog.setContentView(layoutRes);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-        // Logic for "Primary Action" buttons (Accept / Mark as Ready)
-        Button btnPrimary = dialog.findViewById(R.id.btnPrimaryAction);
-        if (btnPrimary != null) {
-            btnPrimary.setOnClickListener(v -> {
-                String nextStatus = order.status.equals("Pending") ? "Preparing" : "Completed";
-                int successLayout = order.status.equals("Pending") ?
-                        R.layout.admin_dialog_order_accepted : R.layout.admin_dialog_order_ready;
-
-                FirebaseDatabase.getInstance().getReference("Orders")
-                        .child(order.orderId).child("status").setValue(nextStatus)
-                        .addOnSuccessListener(aVoid -> {
-                            dialog.dismiss();
-                            AdminDialogHelper.showStatusDialog(context, successLayout);
-                        });
-            });
-        }
-
-        // Logic for Cancel/Delete
-        View btnSecondary = dialog.findViewById(R.id.btnSecondaryAction);
-        if (btnSecondary != null) {
-            btnSecondary.setOnClickListener(v -> {
-                dialog.dismiss();
-                AdminDialogHelper.showDeleteConfirmDialog(context, order.orderId);
-            });
-        }
-
-        dialog.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
     }
 
     @Override
     public int getItemCount() { return orderList.size(); }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderId, tvTotal;
+        TextView tvOrderNo, tvStatusBadge, tvCustomerName, tvItems, tvItemCount, tvTotal;
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvOrderId = itemView.findViewById(R.id.tvOrder);
+            tvOrderNo = itemView.findViewById(R.id.tvOrderNo);
+            tvStatusBadge = itemView.findViewById(R.id.tvStatusBadge);
+            tvCustomerName = itemView.findViewById(R.id.tvCustomerName);
+            tvItems = itemView.findViewById(R.id.tvItems);
+            tvItemCount = itemView.findViewById(R.id.tvItemCount);
             tvTotal = itemView.findViewById(R.id.tvTotal);
         }
     }
