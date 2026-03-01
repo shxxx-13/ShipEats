@@ -43,6 +43,10 @@ dependencies {
     implementation("com.google.firebase:firebase-database") // Realtime Database
     implementation("com.google.firebase:firebase-auth") // Firebase Authentication
     implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.activity:activity:1.12.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 
     testImplementation(libs.junit)

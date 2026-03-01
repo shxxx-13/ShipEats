@@ -36,24 +36,44 @@ public class C5_History_Page extends AppCompatActivity {
 
         historyContainer = findViewById(R.id.history_lists_container);
         ordersRef = FirebaseDatabase.getInstance().getReference("Orders");
-        currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
-                        FirebaseAuth.getInstance().getCurrentUser().getUid() : "GuestUser";
+        
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            currentUserId = "GuestUser";
+        }
 
         ImageView history_icon = findViewById(R.id.history_icon);
         TextView history_text = findViewById(R.id.history_text);
         ImageView back_button = findViewById(R.id.back_button);
         LinearLayout menu_nav = findViewById(R.id.menu_nav);
         LinearLayout settings_nav = findViewById(R.id.settings_nav);
-        TextView clear_history = findViewById(R.id.clear_history);
 
-        back_button.setOnClickListener(v -> finish());
-        menu_nav.setOnClickListener(v -> startActivity(new Intent(this, C3_Menu_Page.class)));
-        settings_nav.setOnClickListener(v -> startActivity(new Intent(this, C13_Settings_Page.class )));
+        if (back_button != null) back_button.setOnClickListener(v -> finish());
+        
+        if (menu_nav != null) {
+            menu_nav.setOnClickListener(v -> {
+                Intent intent = new Intent(this, C3_Menu_Page.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+            });
+        }
+        
+        if (settings_nav != null) {
+            settings_nav.setOnClickListener(v -> {
+                Intent intent = new Intent(this, C13_Settings_Page.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+            });
+        }
 
-        int activeColor = Color.parseColor("#FFD700");
-        history_icon.setColorFilter(activeColor);
-        history_text.setTextColor(activeColor);
-        history_text.setTypeface(null, Typeface.BOLD);
+        // Highlight Footer
+        if (history_icon != null && history_text != null) {
+            int activeColor = Color.parseColor("#FFD700");
+            history_icon.setColorFilter(activeColor);
+            history_text.setTextColor(activeColor);
+            history_text.setTypeface(null, Typeface.BOLD);
+        }
 
         loadOrderHistory();
     }
@@ -62,41 +82,50 @@ public class C5_History_Page extends AppCompatActivity {
         ordersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    return;
+                }
+
                 historyContainer.removeAllViews();
-                boolean hasOrders = false;
+                int count = 0;
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     AdminOrderModel order = ds.getValue(AdminOrderModel.class);
-                    if (order != null && currentUserId.equals(order.customerId)) {
+                    
+                    if (order != null && order.customerId != null && order.customerId.equals(currentUserId)) {
                         addHistoryRow(order);
-                        hasOrders = true;
+                        count++;
                     }
-                }
-
-                if (!hasOrders) {
-                    Toast.makeText(C5_History_Page.this, "No order history found", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(C5_History_Page.this, "Error loading history", Toast.LENGTH_SHORT).show();
+                Toast.makeText(C5_History_Page.this, "Database Error", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void addHistoryRow(AdminOrderModel order) {
-        View row = LayoutInflater.from(this).inflate(R.layout.order_history_list_layout, historyContainer, false);
+        // Using the row layout that matches the table design
+        View row = LayoutInflater.from(this).inflate(R.layout.order_history_card_layout, historyContainer, false);
         
-        TextView name = row.findViewById(R.id.item_name);
-        TextView qty = row.findViewById(R.id.item_quantity);
-        TextView price = row.findViewById(R.id.item_total_price);
-        TextView instructions = row.findViewById(R.id.special_instruction);
+        TextView tvDate = row.findViewById(R.id.date_history);
+        TextView tvPayment = row.findViewById(R.id.payment_history);
+        TextView tvAmount = row.findViewById(R.id.amount_history);
+        TextView btnDetails = row.findViewById(R.id.view_details_button);
 
-        name.setText(order.items); // Summary of items
-        qty.setText(String.valueOf(order.itemCount));
-        price.setText(order.totalPrice);
-        instructions.setText("Status: " + order.status);
+        if (tvDate != null) tvDate.setText(order.date != null ? order.date : "Today");
+        if (tvPayment != null) tvPayment.setText(order.paymentMethod != null ? order.paymentMethod : "Card");
+        if (tvAmount != null) tvAmount.setText(order.totalPrice != null ? order.totalPrice.replace("RM ", "") : "0.00");
+        
+        if (btnDetails != null) {
+            btnDetails.setOnClickListener(v -> {
+                Intent intent = new Intent(this, C6_History_Details_Page.class);
+                intent.putExtra("ORDER_ID", order.orderId);
+                startActivity(intent);
+            });
+        }
 
         historyContainer.addView(row);
     }

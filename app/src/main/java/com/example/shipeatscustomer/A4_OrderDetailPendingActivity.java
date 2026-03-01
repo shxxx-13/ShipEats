@@ -3,8 +3,6 @@ package com.example.shipeatscustomer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +20,7 @@ public class A4_OrderDetailPendingActivity extends AppCompatActivity {
     private TextView tvOrderNo, tvStatus, tvCustName, tvCustPhone, tvItems, tvTotal;
     private String orderId;
     private DatabaseReference orderRef;
+    private AdminOrderModel currentOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +50,13 @@ public class A4_OrderDetailPendingActivity extends AppCompatActivity {
         View btnAccept = findViewById(R.id.btnPrimaryAction);
         if (btnAccept != null) {
             btnAccept.setOnClickListener(v -> {
+                if (currentOrder == null) return;
+                
                 orderRef.child("status").setValue("Preparing")
                         .addOnSuccessListener(aVoid -> {
+                            // Send notification to customer
+                            NotificationHelper.sendOrderNotification(currentOrder.customerId, orderId, "Preparing");
+                            
                             Intent intent = new Intent(this, OrderAcceptedPPActivity.class);
                             startActivity(intent);
                             finish();
@@ -65,8 +69,13 @@ public class A4_OrderDetailPendingActivity extends AppCompatActivity {
         View btnCancel = findViewById(R.id.btnSecondaryAction);
         if (btnCancel != null) {
             btnCancel.setOnClickListener(v -> {
+                if (currentOrder == null) return;
+
                 orderRef.child("status").setValue("Cancelled")
                         .addOnSuccessListener(aVoid -> {
+                            // Send notification to customer
+                            NotificationHelper.sendOrderNotification(currentOrder.customerId, orderId, "Cancelled");
+                            
                             AdminDialogHelper.showStatusDialog(this, R.layout.admin_dialog_order_deleted);
                             finish();
                         });
@@ -83,25 +92,26 @@ public class A4_OrderDetailPendingActivity extends AppCompatActivity {
         orderRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                AdminOrderModel order = snapshot.getValue(AdminOrderModel.class);
-                if (order != null) {
+                currentOrder = snapshot.getValue(AdminOrderModel.class);
+                if (currentOrder != null) {
+                    currentOrder.orderId = orderId; // Ensure ID is set
                     String displayId = orderId.length() > 8 ? orderId.substring(orderId.length() - 8).toUpperCase() : orderId;
                     if (tvOrderNo != null) tvOrderNo.setText("#" + displayId);
                     
-                    if (tvStatus != null && order.status != null) {
-                        tvStatus.setText(order.status.toLowerCase());
+                    if (tvStatus != null && currentOrder.status != null) {
+                        tvStatus.setText(currentOrder.status.toLowerCase());
                     }
                     
                     if (tvCustName != null) {
-                        tvCustName.setText(order.customerName != null ? order.customerName : "Guest");
+                        tvCustName.setText(currentOrder.customerName != null ? currentOrder.customerName : "Guest");
                     }
                     
                     if (tvItems != null) {
-                        tvItems.setText(order.items != null ? order.items : "No items");
+                        tvItems.setText(currentOrder.items != null ? currentOrder.items : "No items");
                     }
                     
                     if (tvTotal != null) {
-                        tvTotal.setText(order.totalPrice != null ? order.totalPrice : "RM 0.00");
+                        tvTotal.setText(currentOrder.totalPrice != null ? currentOrder.totalPrice : "RM 0.00");
                     }
                 } else {
                     Toast.makeText(A4_OrderDetailPendingActivity.this, "Order details not found", Toast.LENGTH_SHORT).show();

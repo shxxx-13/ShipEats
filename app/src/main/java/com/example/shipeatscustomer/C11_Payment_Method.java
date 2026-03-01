@@ -9,14 +9,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class C11_Payment_Method extends AppCompatActivity {
 
@@ -25,6 +32,7 @@ public class C11_Payment_Method extends AppCompatActivity {
     private ImageView ivBack;
     private Button btnPlaceOrder;
     private DatabaseReference ordersRef;
+    private String selectedMethod = "Card"; // Default
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +52,16 @@ public class C11_Payment_Method extends AppCompatActivity {
         ivBack.setOnClickListener(v -> finish());
 
         // 3. Set Card Click Logic
-        btnCard.setOnClickListener(v -> showCardInfo());
+        btnCard.setOnClickListener(v -> {
+            selectedMethod = "Card";
+            showCardInfo();
+        });
 
         // 4. Set FPX Click Logic
-        btnFPX.setOnClickListener(v -> showFPXInfo());
+        btnFPX.setOnClickListener(v -> {
+            selectedMethod = "FPX";
+            showFPXInfo();
+        });
 
         // 5. Place Order Logic
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
@@ -68,6 +82,8 @@ public class C11_Payment_Method extends AppCompatActivity {
         String userName = user != null && user.getEmail() != null ? user.getEmail().split("@")[0] : "Guest Customer";
         
         String orderId = ordersRef.push().getKey();
+        String pickupTime = getIntent().getStringExtra("PICKUP_TIME");
+        if (pickupTime == null) pickupTime = "";
         
         StringBuilder itemsSummary = new StringBuilder();
         double subtotal = 0;
@@ -76,41 +92,49 @@ public class C11_Payment_Method extends AppCompatActivity {
         for (CartItem item : cartItems) {
             itemsSummary.append(item.getFoodItem().getName())
                         .append(" x")
-                        .append(item.getQuantity())
-                        .append("\n");
+                        .append(item.getQuantity());
+            
+            if (item.getSpecialInstructions() != null && !item.getSpecialInstructions().isEmpty()) {
+                itemsSummary.append("\n [Note: ").append(item.getSpecialInstructions()).append("]");
+            }
+            if (item.isWantCutlery()) {
+                itemsSummary.append("\n [Want Cutlery: Yes]");
+            }
+            itemsSummary.append("\n\n");
+            
             subtotal += item.getFoodItem().getPrice() * item.getQuantity();
             totalQty += item.getQuantity();
         }
 
-        double total = subtotal + (subtotal * 0.06) + 1.00; // Total with tax and platform fee
+        double total = subtotal + (subtotal * 0.06) + 1.00;
         String finalPrice = String.format("RM %.2f", total);
+        
+        // Current Date
+        String date = new SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(new Date());
 
-        // Creating the order object for the admin to see
-        // FIX: Passing all 7 required arguments to match the updated AdminOrderModel constructor
         AdminOrderModel order = new AdminOrderModel(
                 orderId, 
                 itemsSummary.toString().trim(), 
                 finalPrice, 
                 "Pending", 
-                totalQty, 
+                (long) totalQty, 
                 userName, 
-                userId
+                userId,
+                date,
+                selectedMethod,
+                pickupTime
         );
 
         if (orderId != null) {
             ordersRef.child(orderId).setValue(order).addOnSuccessListener(aVoid -> {
-                // Clear the cart after successful order
                 CartManager.getInstance().clearCart();
-                
-                // Show success screen and pass order number
+                notifyAdminsAndCustomer(order, userId);
                 Intent intent = new Intent(C11_Payment_Method.this, C8_Order_Placed.class);
                 intent.putExtra("ORDER_ID", orderId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                
-                Toast.makeText(this, "Order Placed Successfully!", Toast.LENGTH_LONG).show();
             }).addOnFailureListener(e -> {
-                Toast.makeText(this, "Failed to place order: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to place order", Toast.LENGTH_SHORT).show();
             });
         }
     }
@@ -118,12 +142,26 @@ public class C11_Payment_Method extends AppCompatActivity {
     private void showCardInfo() {
         btnCard.setCardBackgroundColor(Color.parseColor("#B2EBF2")); 
         btnFPX.setCardBackgroundColor(Color.WHITE);
-        tvPaymentInfo.setText("Secure credit/debit card payment. Your data is encrypted and never stored on our servers.");
+        tvPaymentInfo.setText("Secure credit/debit card payment.");
     }
 
     private void showFPXInfo() {
         btnFPX.setCardBackgroundColor(Color.parseColor("#B2EBF2"));
         btnCard.setCardBackgroundColor(Color.WHITE);
-        tvPaymentInfo.setText("Pay directly via your bank's secure online portal. Fast and reliable transactions.");
+        tvPaymentInfo.setText("Pay directly via your bank's secure online portal.");
+    }
+
+    private void notifyAdminsAndCustomer(AdminOrderModel order, String customerId) {
+        NotificationHelper.sendOrderNotification(customerId, order.orderId, "Pending");
+        DatabaseReference adminsRef = FirebaseDatabase.getInstance().getReference("Admins");
+        adminsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot adminSnap : snapshot.getChildren()) {
+                    NotificationHelper.sendAdminNotification(adminSnap.getKey(), "New Order", "Order #" + order.orderId, "order", order.orderId);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 }

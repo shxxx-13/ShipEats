@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
     private void performGuestLogin() {
         String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();

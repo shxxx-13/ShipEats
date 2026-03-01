@@ -18,14 +18,23 @@ public class CartManager {
         return instance;
     }
 
-    public void addToCart(FoodItem foodItem, int quantity) {
+    public void addToCart(FoodItem foodItem, int quantity, String specialInstructions, boolean wantCutlery) {
         for (CartItem item : cartItems) {
             if (item.getFoodItem().getId().equals(foodItem.getId())) {
                 item.setQuantity(item.getQuantity() + quantity);
+                // Update instructions if any new ones provided, or append
+                if (specialInstructions != null && !specialInstructions.isEmpty()) {
+                    item.setSpecialInstructions(specialInstructions);
+                }
+                item.setWantCutlery(wantCutlery);
                 return;
             }
         }
-        cartItems.add(new CartItem(foodItem, quantity));
+        cartItems.add(new CartItem(foodItem, quantity, specialInstructions, wantCutlery));
+    }
+
+    public void addToCart(FoodItem foodItem, int quantity) {
+        addToCart(foodItem, quantity, "", false);
     }
 
     public List<CartItem> getCartItems() {

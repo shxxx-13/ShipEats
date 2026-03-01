@@ -22,6 +22,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -136,6 +137,26 @@ public class C3_Menu_Page extends AppCompatActivity {
             menu_text.setTextColor(activeColor);
             menu_text.setTypeface(null, Typeface.BOLD);
         }
+
+        ImageView notificationIcon = findViewById(R.id.notification_icon);
+        notificationIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(C3_Menu_Page.this, NotificationsActivity.class);
+            startActivity(intent);
+        });
+
+// Optional: fetch unread count and show badge
+        DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("notifications")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        notifRef.orderByChild("read").equalTo(false).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                long unreadCount = snapshot.getChildrenCount();
+                // update badge on notificationIcon (e.g., show a red circle with number)
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
     private void loadMenuItems() {
@@ -276,4 +297,6 @@ public class C3_Menu_Page extends AppCompatActivity {
             noMenuText.setVisibility(View.GONE);
         }
     }
+
+
 }

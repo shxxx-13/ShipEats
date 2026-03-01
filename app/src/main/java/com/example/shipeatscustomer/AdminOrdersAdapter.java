@@ -2,6 +2,7 @@ package com.example.shipeatscustomer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,66 +26,89 @@ public class AdminOrdersAdapter extends RecyclerView.Adapter<AdminOrdersAdapter.
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.admin_it_order_card, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.admin_it_order_card, parent, false);
         return new OrderViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         AdminOrderModel order = orderList.get(position);
-
         if (order == null) return;
 
-        // Null-safe Order ID display
+        // Order number
         String orderId = order.orderId != null ? order.orderId : "unknown";
         String displayId = orderId.length() > 8 ? orderId.substring(orderId.length() - 8).toUpperCase() : orderId;
         holder.tvOrderNo.setText("#" + displayId);
 
-        // Null-safe status display
+        // Status
         String status = order.status != null ? order.status : "Pending";
         holder.tvStatusBadge.setText(status.toLowerCase());
 
-        holder.tvCustomerName.setText("⚪ " + (order.customerName != null ? order.customerName : "Guest"));
-        
-        String itemsText = order.items != null ? order.items.replace("\n", ", ") : "No items";
-        holder.tvItems.setText("Items: " + itemsText);
-        
-        holder.tvItemCount.setText(order.itemCount + (order.itemCount > 1 ? " items" : " item"));
-        holder.tvTotal.setText("Total " + (order.totalPrice != null ? order.totalPrice : "RM 0.00"));
-
-        // Update badge color based on status
+        // Set badge color based on status
         if ("Pending".equalsIgnoreCase(status)) {
-            holder.tvStatusBadge.setBackgroundResource(R.drawable.stat_pending_bg);
+            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#FFA500")); // orange
+            holder.tvStatusBadge.setTextColor(Color.WHITE);
         } else if ("Preparing".equalsIgnoreCase(status)) {
-            holder.tvStatusBadge.setBackgroundResource(R.drawable.stat_preparing_bg);
+            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#4CAF50")); // green
+            holder.tvStatusBadge.setTextColor(Color.WHITE);
         } else {
-            holder.tvStatusBadge.setBackgroundResource(R.drawable.stat_accepted_bg);
+            holder.tvStatusBadge.setBackgroundColor(Color.parseColor("#2196F3")); // blue
+            holder.tvStatusBadge.setTextColor(Color.WHITE);
         }
 
+        // Pre-order / Pickup Time Display
+        if (order.pickupTime != null && !order.pickupTime.isEmpty()) {
+            holder.tvPickupTime.setText("Pickup: " + order.pickupTime);
+            holder.tvPickupTime.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvPickupTime.setVisibility(View.GONE);
+        }
+
+        // Customer name
+        String customerName = order.customerName != null ? order.customerName : "Guest";
+        holder.tvCustomerName.setText("⚪ " + customerName);
+
+        // Items
+        String itemsText = order.items != null ? order.items.replace("\n", ", ") : "No items";
+        holder.tvItems.setText("Items: " + itemsText);
+
+        // Item count
+        long count = order.itemCount;
+        holder.tvItemCount.setText(count + (count > 1 ? " items" : " item"));
+
+        // Total price
+        String total = order.totalPrice != null ? order.totalPrice : "RM 0.00";
+        holder.tvTotal.setText("Total " + total);
+
+        // Click to open order details
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = null;
+            Intent intent;
             if ("Pending".equalsIgnoreCase(status)) {
                 intent = new Intent(context, A4_OrderDetailPendingActivity.class);
             } else if ("Preparing".equalsIgnoreCase(status)) {
                 intent = new Intent(context, A4_OrderDetailPreparingActivity.class);
+            } else {
+                intent = new Intent(context, A4_OrderDetailCompletedActivity.class);
             }
-
-            if (intent != null) {
-                intent.putExtra("orderId", orderId);
-                context.startActivity(intent);
-            }
+            
+            intent.putExtra("orderId", orderId);
+            context.startActivity(intent);
         });
     }
 
     @Override
-    public int getItemCount() { return orderList.size(); }
+    public int getItemCount() {
+        return orderList.size();
+    }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderNo, tvStatusBadge, tvCustomerName, tvItems, tvItemCount, tvTotal;
-        public OrderViewHolder(@NonNull View itemView) {
+        TextView tvOrderNo, tvStatusBadge, tvCustomerName, tvItems, tvItemCount, tvTotal, tvPickupTime;
+
+        OrderViewHolder(@NonNull View itemView) {
             super(itemView);
             tvOrderNo = itemView.findViewById(R.id.tvOrderNo);
             tvStatusBadge = itemView.findViewById(R.id.tvStatusBadge);
+            tvPickupTime = itemView.findViewById(R.id.tvPickupTime);
             tvCustomerName = itemView.findViewById(R.id.tvCustomerName);
             tvItems = itemView.findViewById(R.id.tvItems);
             tvItemCount = itemView.findViewById(R.id.tvItemCount);

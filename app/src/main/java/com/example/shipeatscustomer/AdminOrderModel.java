@@ -9,14 +9,16 @@ public class AdminOrderModel implements Serializable {
     public String status;
     public String customerName;
     public String customerId;
-    public int itemCount;
+    public Long itemCount;
+    public String date;
+    public String paymentMethod;
+    public String pickupTime; // New field for pre-orders
 
     public AdminOrderModel() {
         // Required empty constructor for Firebase
     }
 
-    // Comprehensive constructor
-    public AdminOrderModel(String orderId, String items, String totalPrice, String status, int itemCount, String customerName, String customerId) {
+    public AdminOrderModel(String orderId, String items, String totalPrice, String status, Long itemCount, String customerName, String customerId, String date, String paymentMethod, String pickupTime) {
         this.orderId = orderId;
         this.items = items;
         this.totalPrice = totalPrice;
@@ -24,14 +26,8 @@ public class AdminOrderModel implements Serializable {
         this.itemCount = itemCount;
         this.customerName = customerName;
         this.customerId = customerId;
-    }
-
-    // Legacy constructor for compatibility if needed
-    public AdminOrderModel(String orderId, String items, String totalPrice, String status, int itemCount) {
-        this.orderId = orderId;
-        this.items = items;
-        this.totalPrice = totalPrice;
-        this.status = status;
-        this.itemCount = itemCount;
+        this.date = date;
+        this.paymentMethod = paymentMethod;
+        this.pickupTime = pickupTime;
     }
 }

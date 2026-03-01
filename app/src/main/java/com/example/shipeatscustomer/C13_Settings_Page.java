@@ -3,7 +3,9 @@ package com.example.shipeatscustomer;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -54,8 +56,14 @@ public class C13_Settings_Page extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        // Receiving the serializable object from C12_Profile
-                        Student updatedStudent = (Student) result.getData().getSerializableExtra("STUDENT_DATA");
+                        // FIX: Handled deprecated getSerializableExtra for modern Android versions
+                        Student updatedStudent;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            updatedStudent = result.getData().getSerializableExtra("STUDENT_DATA", Student.class);
+                        } else {
+                            updatedStudent = (Student) result.getData().getSerializableExtra("STUDENT_DATA");
+                        }
+                        
                         if (updatedStudent != null) {
                             updateCardUI(updatedStudent);
                         }
@@ -65,16 +73,22 @@ public class C13_Settings_Page extends AppCompatActivity {
 
         // 5. Drawer & Footer Click Listeners
         if (closeTabBtn != null) {
-            closeTabBtn.setOnClickListener(v -> drawerLayout.closeDrawer(GravityCompat.START));
+            closeTabBtn.setOnClickListener(v -> {
+                if (drawerLayout != null) drawerLayout.closeDrawer(GravityCompat.START);
+            });
         }
 
-        history_nav.setOnClickListener(v -> startActivity(new Intent(this, C5_History_Page.class)));
-        menu_nav.setOnClickListener(v -> startActivity(new Intent(this, C3_Menu_Page.class)));
+        if (history_nav != null) history_nav.setOnClickListener(v -> startActivity(new Intent(this, C5_History_Page.class)));
+        if (menu_nav != null) menu_nav.setOnClickListener(v -> startActivity(new Intent(this, C3_Menu_Page.class)));
 
         // We are already on Settings, so just close the drawer
-        settings_nav.setOnClickListener(v -> {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) drawerLayout.closeDrawer(GravityCompat.START);
-        });
+        if (settings_nav != null) {
+            settings_nav.setOnClickListener(v -> {
+                if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                }
+            });
+        }
 
         // 6. Load Initial Data and Setup Menu
         loadSavedProfile();
@@ -84,29 +98,50 @@ public class C13_Settings_Page extends AppCompatActivity {
     //Sets up click listeners for the individual settings rows in the ScrollView
     private void setupMenuNavigation() {
         // General Section
-        findViewById(R.id.btnEditProfile).setOnClickListener(v -> {
-            Intent intent = new Intent(this, C12_Profile.class);
-            profileResultLauncher.launch(intent);
-        });
+        View btnEditProfile = findViewById(R.id.btnEditProfile);
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(this, C12_Profile.class);
+                profileResultLauncher.launch(intent);
+            });
+        }
 
-        findViewById(R.id.btnOrderHistory).setOnClickListener(v ->
-                startActivity(new Intent(this, C5_History_Page.class)));
+        View btnOrderHistory = findViewById(R.id.btnOrderHistory);
+        if (btnOrderHistory != null) {
+            btnOrderHistory.setOnClickListener(v ->
+                    startActivity(new Intent(this, C5_History_Page.class)));
+        }
 
-        findViewById(R.id.btnPaymentMethods).setOnClickListener(v ->
-                startActivity(new Intent(this, C11_Payment_Method.class)));
+        View btnPaymentMethods = findViewById(R.id.btnPaymentMethods);
+        if (btnPaymentMethods != null) {
+            btnPaymentMethods.setOnClickListener(v ->
+                    startActivity(new Intent(this, C11_Payment_Method.class)));
+        }
 
-        findViewById(R.id.btnNotifications).setOnClickListener(v ->
-                startActivity(new Intent(this, C10_Notifications.class)));
+        View btnNotifications = findViewById(R.id.btnNotifications);
+        if (btnNotifications != null) {
+            btnNotifications.setOnClickListener(v ->
+                    startActivity(new Intent(this, C10_Notifications.class)));
+        }
 
         // About Section
-        findViewById(R.id.btnAboutShipEats).setOnClickListener(v ->
-                startActivity(new Intent(this, C9_About.class)));
+        View btnAbout = findViewById(R.id.btnAboutShipEats);
+        if (btnAbout != null) {
+            btnAbout.setOnClickListener(v ->
+                    startActivity(new Intent(this, C9_About.class)));
+        }
 
-        findViewById(R.id.btnTerms).setOnClickListener(v ->
-                startActivity(new Intent(this, C14_Terms_And_Condition.class)));
+        View btnTerms = findViewById(R.id.btnTerms);
+        if (btnTerms != null) {
+            btnTerms.setOnClickListener(v ->
+                    startActivity(new Intent(this, C14_Terms_And_Condition.class)));
+        }
 
         // Logout
-        findViewById(R.id.btnLogout).setOnClickListener(v -> showLogoutDialog());
+        View btnLogout = findViewById(R.id.btnLogout);
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> showLogoutDialog());
+        }
     }
 
     
@@ -114,14 +149,14 @@ public class C13_Settings_Page extends AppCompatActivity {
     private void loadSavedProfile() {
         SharedPreferences sharedPreferences = getSharedPreferences("StudentPrefs", MODE_PRIVATE);
 
-        String name = sharedPreferences.getString("name", "Hoo Suline");
+        String name = sharedPreferences.getString("name", "Hoo Soline");
         String id = sharedPreferences.getString("studentID", "050505070505");
         String imageUriString = sharedPreferences.getString("imageUri", "");
 
-        tvCardName.setText(name);
-        tvCardID.setText(id);
+        if (tvCardName != null) tvCardName.setText(name);
+        if (tvCardID != null) tvCardID.setText(id);
 
-        if (!imageUriString.isEmpty()) {
+        if (!imageUriString.isEmpty() && ivCardProfilePicture != null) {
             Glide.with(this)
                     .load(Uri.parse(imageUriString))
                     .placeholder(R.drawable.placeholder_user)
@@ -132,9 +167,9 @@ public class C13_Settings_Page extends AppCompatActivity {
 
     //Updates the UI immediately when data is returned from the Profile screen
     private void updateCardUI(Student student) {
-        tvCardName.setText(student.getName());
+        if (tvCardName != null) tvCardName.setText(student.getName());
 
-        if (student.getProfileImageUri() != null && !student.getProfileImageUri().isEmpty()) {
+        if (student.getProfileImageUri() != null && !student.getProfileImageUri().isEmpty() && ivCardProfilePicture != null) {
             Glide.with(this)
                     .load(Uri.parse(student.getProfileImageUri()))
                     .placeholder(R.drawable.placeholder_user)

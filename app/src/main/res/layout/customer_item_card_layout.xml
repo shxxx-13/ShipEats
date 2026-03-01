@@ -43,17 +43,34 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:id="@+id/item_name"
-                        android:layout_width="0dp"
+                        android:layout_width="205dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Item Name"
                         android:textColor="@color/black"
                         android:textSize="18sp"
                         android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/ic_spicy"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="4dp"
+                        android:src="@drawable/spicy_icon"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/ic_veg"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/vegetarian_icon"
+                        android:visibility="gone" />
 
                     <ImageView
                         android:layout_width="14dp"

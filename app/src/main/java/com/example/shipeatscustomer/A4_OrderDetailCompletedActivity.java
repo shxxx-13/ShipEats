@@ -1,6 +1,5 @@
 package com.example.shipeatscustomer;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -15,17 +14,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class A4_OrderDetailPreparingActivity extends AppCompatActivity {
+public class A4_OrderDetailCompletedActivity extends AppCompatActivity {
 
-    private TextView tvOrderNo, tvStatus, tvCustName, tvCustPhone, tvItems, tvTotal;
+    private TextView tvOrderNo, tvStatus, tvCustName, tvCustPhone, tvItems, tvTotal, tvPayMeth, tvPayStat;
     private String orderId;
     private DatabaseReference orderRef;
-    private AdminOrderModel currentOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_a4_order_det_preparing);
+        setContentView(R.layout.activity_a4_order_det_history);
 
         orderId = getIntent().getStringExtra("orderId");
         if (orderId == null) {
@@ -36,34 +34,17 @@ public class A4_OrderDetailPreparingActivity extends AppCompatActivity {
 
         orderRef = FirebaseDatabase.getInstance().getReference("Orders").child(orderId);
 
-        // Initialize Views with null checks
+        // Initialize Views with robust null checks
         tvOrderNo = findViewById(R.id.tvOrderNoValue);
         tvStatus = findViewById(R.id.tvStatusBadge);
         tvCustName = findViewById(R.id.tvCustName);
         tvCustPhone = findViewById(R.id.tvCustPhone);
         tvItems = findViewById(R.id.tvItemName);
         tvTotal = findViewById(R.id.tvTotalValue);
+        tvPayMeth = findViewById(R.id.tvPaymet);
+        tvPayStat = findViewById(R.id.tvPaystat);
 
         loadOrderDetails();
-
-        // MARK AS READY / COMPLETED
-        View btnReady = findViewById(R.id.btnPrimaryAction);
-        if (btnReady != null) {
-            btnReady.setOnClickListener(v -> {
-                if (currentOrder == null) return;
-                
-                orderRef.child("status").setValue("Completed")
-                        .addOnSuccessListener(aVoid -> {
-                            // Send notification to customer
-                            NotificationHelper.sendOrderNotification(currentOrder.customerId, orderId, "Ready for Pickup");
-                            
-                            Intent intent = new Intent(this, OrderReadyPPActivity.class);
-                            startActivity(intent);
-                            finish();
-                        })
-                        .addOnFailureListener(e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            });
-        }
 
         View btnClose = findViewById(R.id.btnClose);
         if (btnClose != null) {
@@ -75,35 +56,38 @@ public class A4_OrderDetailPreparingActivity extends AppCompatActivity {
         orderRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                currentOrder = snapshot.getValue(AdminOrderModel.class);
-                if (currentOrder != null) {
-                    currentOrder.orderId = orderId;
+                AdminOrderModel order = snapshot.getValue(AdminOrderModel.class);
+                if (order != null) {
                     String displayId = orderId.length() > 8 ? orderId.substring(orderId.length() - 8).toUpperCase() : orderId;
                     if (tvOrderNo != null) tvOrderNo.setText("#" + displayId);
                     
-                    if (tvStatus != null && currentOrder.status != null) {
-                        tvStatus.setText(currentOrder.status.toLowerCase());
+                    if (tvStatus != null && order.status != null) {
+                        tvStatus.setText(order.status.toLowerCase());
                     }
                     
                     if (tvCustName != null) {
-                        tvCustName.setText(currentOrder.customerName != null ? currentOrder.customerName : "Guest");
+                        tvCustName.setText(order.customerName != null ? order.customerName : "Guest");
                     }
                     
                     if (tvItems != null) {
-                        tvItems.setText(currentOrder.items != null ? currentOrder.items : "No items");
+                        tvItems.setText(order.items != null ? order.items : "No items");
                     }
                     
                     if (tvTotal != null) {
-                        tvTotal.setText(currentOrder.totalPrice != null ? currentOrder.totalPrice : "RM 0.00");
+                        tvTotal.setText(order.totalPrice != null ? order.totalPrice : "RM 0.00");
                     }
+
+                    // Set default payment info for history
+                    if (tvPayMeth != null) tvPayMeth.setText("ONLINE");
+                    if (tvPayStat != null) tvPayStat.setText("PAID");
                 } else {
-                    Toast.makeText(A4_OrderDetailPreparingActivity.this, "Order details not found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(A4_OrderDetailCompletedActivity.this, "Details not found", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(A4_OrderDetailPreparingActivity.this, "Error loading data", Toast.LENGTH_SHORT).show();
+                Toast.makeText(A4_OrderDetailCompletedActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
